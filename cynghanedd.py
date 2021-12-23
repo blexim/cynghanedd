@@ -11,7 +11,7 @@ import time
 # dictionary, containing the spelling and pronunciation (in IPA) of the words.
 # The format of each line in the file is:
 # <spelling> <tab> <pronunciation>
-DICTFILE = 'data/en_UK.txt'
+DICTFILE = 'data/mrc2.txt'
 
 # We are interested in mapping between two representations of words:
 #  * a "word" is the normal spelling of a word, as a string.
@@ -62,8 +62,7 @@ def line_skeleton(line):
 # Converts an IPA pronunciation string to its skeleton, which is done by discarding
 # all the phoneme symbols other than consonants.
 def skeleton(ipa):
-    pronunciation = gruut_ipa.Pronunciation.from_string(ipa)
-    return tuple(str(phoneme) for phoneme in pronunciation if phoneme.is_consonant)
+    return tuple(ipa.split())
 
 # Builds the database mapping between words and skeletons.
 def build_database():
