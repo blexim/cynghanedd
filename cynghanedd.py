@@ -175,5 +175,12 @@ def search(line_skeleton):
 # lazily generates sequences of words with those segmented skeletons. We do this lazily because
 # the number of returned word sequences can be quite large.
 def expand(solutions):
-    expanded_solns = [itertools.product(*[skeleton_to_words[skel] for skel in segmented]) for segmented in solutions]
-    return itertools.chain(*expanded_solns)
+    def expand_skeleton(skeleton):
+        for word in skeleton_to_words[skeleton]:
+            yield word
+
+    def expand_solution(solution):
+        return itertools.product(*[expand_skeleton(skel) for skel in solution])
+
+    expanded_solutions = [expand_solution(solution) for solution in solutions]
+    return itertools.chain(*expanded_solutions)
