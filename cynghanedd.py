@@ -184,3 +184,38 @@ def expand(solutions):
 
     expanded_solutions = [expand_solution(solution) for solution in solutions]
     return itertools.chain(*expanded_solutions)
+
+def first_words(solutions):
+    ret = set()
+
+    for solution in solutions:
+        ret.update(skeleton_to_words[solution[0]])
+
+    return ret
+
+def choose_word(solutions, word):
+    skeleton = word_skeleton(word)
+    remaining_solutions = [ solution[1:] for solution in solutions if solution[0] == skeleton ]
+    return remaining_solutions
+
+if __name__ == '__main__':
+    import sys
+
+    print("Enter the first half line: ", end="", flush=True)
+    line = sys.stdin.readline().strip()
+
+    solution = search(line_skeleton(line))
+
+    words = []
+
+    while solution and solution[0]:
+        next_words = ' '.join(sorted(first_words(solution)))
+        print(next_words)
+        print("Pick a word: ", end="", flush=True)
+        word = sys.stdin.readline().strip()
+        words.append(word)
+
+        solution = choose_word(solution, word)
+
+    print(' '.join(words))
+
