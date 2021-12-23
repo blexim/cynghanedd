@@ -4,12 +4,13 @@ import sys
 import re
 
 consonants = ['tS', 'dZ', 'p', 'b', 't', 'd', 'k', 'm', 'n',
-        'l', 'r', 'f', 'v', 's', 'z', 'h', 'w', 'g', '9', 'T',
+        'l', 'r', 'f', 'v', 's', 'z', 'g', '9', 'T',
         'D', 'S', 'Z', 'j']
+ignored_consonants = ['h', 'w']
 vowels = ['eI', 'aI', 'oI', '@U', 'aU', 'I@', 'e@', 'u@',
         'i', 'A', 'O', 'u', '3', 'I', 'e', '&', 'V', '0', '@']
 
-pattern = re.compile('|'.join(consonants + vowels))
+pattern = re.compile('|'.join(consonants + ignored_consonants + vowels))
 
 def convert_line(line):
     nlet = int(line[:2])
