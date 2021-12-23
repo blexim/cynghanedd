@@ -52,9 +52,9 @@ word_to_ipa = {}
 def word_skeleton(word):
     return skeleton(word_to_ipa[word.lower()])
 
-# Converts a line (a sequence of words) to its skeletong.
+# Converts a line (a sequence of words) to its skeleton.
 def line_skeleton(line):
-    ret = ''
+    ret = ()
     for word in line.split():
         ret += word_skeleton(word)
     return ret
@@ -63,7 +63,7 @@ def line_skeleton(line):
 # all the phoneme symbols other than consonants.
 def skeleton(ipa):
     pronunciation = gruut_ipa.Pronunciation.from_string(ipa)
-    return ''.join(str(phoneme) for phoneme in pronunciation if phoneme.is_consonant)
+    return tuple(str(phoneme) for phoneme in pronunciation if phoneme.is_consonant)
 
 # Builds the database mapping between words and skeletons.
 def build_database():
@@ -142,27 +142,27 @@ def search(line_skeleton):
     # maintain the property we require (every segment except the last is the skeleton of some
     # word in the dictionary, and the final segment is a prefix of the skeleton of some word
     # in the dictionary).
-    solutions = [[ '' ]]
+    solutions = [[ () ]]
 
     for c in line_skeleton:
         new_solutions = []
 
         for soln in solutions:
             # Try to extend this partial solution.
-            prefix = soln[-1] + c
+            prefix = soln[-1] + (c,)
 
             if skeleton_trie.has_key(prefix):
                 # Case 1: extending the final segment with this phoneme produces a
                 # skeleton in the dictionary.
                 new_soln = copy.copy(soln)
-                new_soln[-1] += c
-                new_soln.append('')
+                new_soln[-1] = prefix
+                new_soln.append(())
                 new_solutions.append(new_soln)
             if skeleton_trie.has_subtrie(prefix):
                 # Case 2: extending the final segment produces a _prefix_ of a skeleton in
                 # the dictionary.
                 new_soln = copy.copy(soln)
-                new_soln[-1] += c
+                new_soln[-1] = prefix
                 new_solutions.append(new_soln)
 
         solutions = new_solutions
