@@ -8,23 +8,25 @@ import gruut_ipa
 import time
 
 # This is the filename of the dictionary we're going to load. It's a phonetic
-# dictionary, containing the spelling and pronunciation (in IPA) of the words.
+# dictionary, containing the spelling and pronunciation skeleton of the words.
 # The format of each line in the file is:
 # <spelling> <tab> <pronunciation>
-DICTFILE = 'data/mrc2.txt'
+DICTFILE = 'data/mrc.txt'
 
 # We are interested in mapping between two representations of words:
 #  * a "word" is the normal spelling of a word, as a string.
-#  * a "skeleton" is a string containing the consonatal skeleton of a piece of
-#    text (which may be a word, or several words). The characters in a skeleton are
-#    IPA glyphs representing consonant sounds.
+#  * a "skeleton" is a tuple of strings describing the consonatal skeleton of a piece of
+#    text (which may be a word, or several words). The components of a skeleton are
+#    strings representing consonant sounds, according to the encoding given at
+#    https://websites.psychology.uwa.edu.au/school/mrcdatabase/mrc2.html#PHON
 #
 # Some examples:
 #
 # word                | skeleton
 # --------------------+---------------
-# cat                 | kt
-# cathartic           | kθtk
+# cat                 | k t
+# cathartic           | k T t k
+# chain               | tS n
 
 # The next three variables form our database, which handles mapping back and forth
 # between words and skeletons.
@@ -35,40 +37,32 @@ DICTFILE = 'data/mrc2.txt'
 skeleton_trie = pygtrie.CharTrie()
 
 # This dict maps from skeletons to the words that have that skeleton. For example,
-# the words "cat", "cart" and "coat" all have the skeleton "kt", so skeleton_to_words["kt"]
-# is a list containing all of those words (as well as all the other words with the
-# same skeleton).
+# the words "cat", "cart" and "coat" all have the skeleton ("k", "t"), so
+# skeleton_to_words[("k", "t")] is a list containing all of those words (as well
+# as all the other words with the same skeleton).
 skeleton_to_words = {}
 
-# This dict maps words to their full IPA pronunciation (as a string). For example, "cat"
-# maps to "/kˈæt/".
-word_to_ipa = {}
+# This dict maps words to their skeleton (as a string). For example, "cat"
+# maps to ("k", "t").
+word_to_skeleton = {}
 
 ########################################################################################
 
 # The next few functions deal with creating the database.
 
-# Converts a word to its skeleton.
-def word_skeleton(word):
-    return skeleton(word_to_ipa[word.lower()])
-
 # Converts a line (a sequence of words) to its skeleton.
 def line_skeleton(line):
     ret = ()
     for word in line.split():
-        ret += word_skeleton(word)
+        ret += word_to_skeleton[word]
     return ret
-
-# Converts an IPA pronunciation string to its skeleton, which is done by discarding
-# all the phoneme symbols other than consonants.
-def skeleton(ipa):
-    return tuple(ipa.split())
 
 # Builds the database mapping between words and skeletons.
 def build_database():
     def clean_ipa(line):
-        [word, ipa] = line.strip().split('\t')
-        return (word.lower(), ipa.lower())
+        [word, pronunciation] = line.lower().strip().split('\t')
+        phones = tuple(pronunciation.split())
+        return (word.lower(), phones)
 
     def now():
         return time.clock_gettime(time.CLOCK_MONOTONIC)
@@ -82,16 +76,15 @@ def build_database():
 
     for line in open(DICTFILE):
         lines += 1
-        if lines % 1000 == 0:
+        if lines % 10000 == 0:
             status(".")
 
-        (word, ipa) = clean_ipa(line)
-        word_to_ipa[word] = ipa
+        (word, skeleton) = clean_ipa(line)
+        word_to_skeleton[word] = skeleton
 
-        skel = skeleton(ipa)
-        skeleton_trie[skel] = True
-        skeleton_to_words[skel] = skeleton_to_words.get(skel, [])
-        skeleton_to_words[skel].append(word)
+        skeleton_trie[skeleton] = True
+        skeleton_to_words[skeleton] = skeleton_to_words.get(skeleton, [])
+        skeleton_to_words[skeleton].append(word)
 
     end_time = now()
 
@@ -111,7 +104,7 @@ build_database()
 # A segmented skeleton is a list of skeletons, with the intention that each skeleton corresponds
 # to one word, so the segmented skeleton represents a sequence of words. For example,
 # the segmented skeleton of the sequence ["his", "peregrinations"] would be
-# ["hz", "pɹɡɹnʃnz"].
+# [("h", "z"), ("p", "r", "g", "r", "n", "S", "n")].
 
 
 # This function takes a skeleton and finds all the ways to segment it such that the segmented
@@ -193,17 +186,22 @@ def first_words(solutions):
     return ret
 
 def choose_word(solutions, word):
-    skeleton = word_skeleton(word)
+    skeleton = word_to_skeleton[word]
     remaining_solutions = [ solution[1:] for solution in solutions if solution[0] == skeleton ]
     return remaining_solutions
 
 if __name__ == '__main__':
     import sys
 
-    print("Enter the first half line: ", end="", flush=True)
+    print("Enter the first half line (as normal text, or as a skeleton): ", end="", flush=True)
     line = sys.stdin.readline().strip()
 
-    solution = search(line_skeleton(line))
+    try:
+        skeleton = line_skeleton(line)
+    except:
+        skeleton = line.lower().split()
+
+    solution = search(skeleton)
 
     words = []
 
