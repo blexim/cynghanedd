@@ -1,3 +1,1 @@
-ipapy
 pygtrie
-gruut-ipa

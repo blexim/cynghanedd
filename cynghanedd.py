@@ -4,7 +4,6 @@
 import pygtrie
 import copy
 import itertools
-import gruut_ipa
 import time
 
 # This is the filename of the dictionary we're going to load. It's a phonetic
