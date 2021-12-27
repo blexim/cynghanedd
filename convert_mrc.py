@@ -5,8 +5,8 @@ import re
 
 consonants = ['tS', 'dZ', 'p', 'b', 't', 'd', 'k', 'm', 'n',
         'l', 'r', 'f', 'v', 's', 'z', 'g', '9', 'T',
-        'D', 'S', 'Z', 'j']
-ignored_consonants = ['h', 'w']
+        'D', 'S', 'Z', 'j', 'h', 'w']
+ignored_consonants = []
 vowels = ['eI', 'aI', 'oI', '@U', 'aU', 'I@', 'e@', 'u@',
         'i', 'A', 'O', 'u', '3', 'I', 'e', '&', 'V', '0', '@']
 
