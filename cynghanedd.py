@@ -53,13 +53,13 @@ word_to_skeleton = {}
 def line_skeleton(line):
     ret = ()
     for word in line.split():
-        ret += word_to_skeleton[word]
+        ret += word_to_skeleton[word.lower()]
     return ret
 
 # Builds the database mapping between words and skeletons.
 def build_database():
     def clean_ipa(line):
-        [word, pronunciation] = line.lower().strip().split('\t')
+        [word, pronunciation] = line.strip().split('\t')
         phones = tuple(pronunciation.split())
         return (word.lower(), phones)
 
