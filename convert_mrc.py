@@ -20,7 +20,7 @@ def convert_line(line):
     phonemes = pattern.findall(pronunciation)
     word_consonants = tuple(phoneme for phoneme in phonemes if phoneme in consonants)
 
-    return (spelling, word_consonants)
+    return (spelling.lower(), word_consonants)
 
 
 def convert_file(filename):
