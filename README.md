@@ -81,3 +81,5 @@ for matches.
 
 The file `data/mrc2.dct` is the
 [MRC Psycholinguistic Dictionary](https://websites.psychology.uwa.edu.au/school/mrcdatabase/mrc2.html).
+
+The file `data/cmudict-0.8b.txt` is the [CMU Pronouncing Dictionary](http://www.speech.cs.cmu.edu/cgi-bin/cmudict).
