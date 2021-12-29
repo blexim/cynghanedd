@@ -197,12 +197,9 @@ def choose_word(solutions, word):
 if __name__ == '__main__':
     import sys
 
-    print("Enter the first half line (as normal text, or as a skeleton): ", end="", flush=True)
+    print("Enter the first half line as a skeleton: ", end="", flush=True)
     line = sys.stdin.readline().strip()
-
-    skeleton = line_to_skeleton(line)
-    if not skeleton:
-        skeleton = line.lower().split()
+    skeleton = line.split()
 
     solution = search(skeleton)
 
