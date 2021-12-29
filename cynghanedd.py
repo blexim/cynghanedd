@@ -10,7 +10,7 @@ import time
 # dictionary, containing the spelling and pronunciation skeleton of the words.
 # The format of each line in the file is:
 # <spelling> <tab> <pronunciation>
-DICTFILE = 'data/mrc.txt'
+DICTFILES = ['data/mrc.txt', 'data/cmu.txt']
 
 # We are interested in mapping between two representations of words:
 #  * a "word" is the normal spelling of a word, as a string.
@@ -49,11 +49,15 @@ word_to_skeleton = {}
 
 # The next few functions deal with creating the database.
 
-# Converts a line (a sequence of words) to its skeleton.
-def line_skeleton(line):
+# Converts a line (a sequence of words) to its skeleton. Returns None if a word
+# in the sequence was not found in the dictionary
+def line_to_skeleton(line):
     ret = ()
-    for word in line.split():
-        ret += word_to_skeleton[word.lower()]
+    for word in line.lower().split():
+        if word not in word_to_skeleton:
+            return None
+
+        ret += word_to_skeleton[word]
     return ret
 
 # Builds the database mapping between words and skeletons.
@@ -73,21 +77,22 @@ def build_database():
     start_time = now()
     lines = 0
 
-    for line in open(DICTFILE):
-        lines += 1
-        if lines % 10000 == 0:
-            status(".")
+    for dictfile in DICTFILES:
+        for line in open(dictfile):
+            lines += 1
+            if lines % 10000 == 0:
+                status(".")
 
-        (word, skeleton) = clean_ipa(line)
-        word_to_skeleton[word] = skeleton
+            (word, skeleton) = clean_ipa(line)
+            word_to_skeleton[word] = skeleton
 
-        skeleton_trie[skeleton] = True
-        skeleton_to_words[skeleton] = skeleton_to_words.get(skeleton, [])
-        skeleton_to_words[skeleton].append(word)
+            skeleton_trie[skeleton] = True
+            skeleton_to_words[skeleton] = skeleton_to_words.get(skeleton, [])
+            skeleton_to_words[skeleton].append(word)
 
     end_time = now()
 
-    print("\nLoaded %d words in %.01fs" % (lines, end_time - start_time))
+    print("\nLoaded %d words in %.01fs" % (len(word_to_skeleton), end_time - start_time))
 
 build_database()
 
@@ -195,9 +200,8 @@ if __name__ == '__main__':
     print("Enter the first half line (as normal text, or as a skeleton): ", end="", flush=True)
     line = sys.stdin.readline().strip()
 
-    try:
-        skeleton = line_skeleton(line)
-    except:
+    skeleton = line_to_skeleton(line)
+    if not skeleton:
         skeleton = line.lower().split()
 
     solution = search(skeleton)
