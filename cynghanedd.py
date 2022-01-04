@@ -194,9 +194,20 @@ def choose_word(solutions, word):
     remaining_solutions = [ solution[1:] for solution in solutions if solution[0] == skeleton ]
     return remaining_solutions
 
-if __name__ == '__main__':
-    import sys
+def complete_cyng(words, skeleton, solution):
+    while solution and solution[0]:
+        next_words = ' '.join(sorted(first_words(solution)))
+        print(next_words)
+        print("Pick a word (or enter comma to go back a step): ", end="", flush=True)
+        word = sys.stdin.readline().strip()
+        while word == ",":
+            word, words, solution = back_cynghanedd(words, skeleton)
+        words.append(word)
 
+        solution = choose_word(solution, word)
+    return words, solution
+
+def run_cynghanedd():
     print("Enter the first half line as a skeleton: ", end="", flush=True)
     line = sys.stdin.readline().strip()
     skeleton = line.split()
@@ -205,14 +216,57 @@ if __name__ == '__main__':
 
     words = []
 
-    while solution and solution[0]:
+    words, solution = complete_cyng(words, skeleton, solution)
+
+    return words, skeleton, solution
+
+
+def back_cynghanedd(old_words, skeleton):
+    solution = search(skeleton)
+
+    print(old_words[:-1])
+    words = []
+    i = 0
+    current_iteration = len(old_words)
+    print("Current iteration is ", end="")
+    print(current_iteration)
+
+    while i < (current_iteration - 1):
         next_words = ' '.join(sorted(first_words(solution)))
-        print(next_words)
-        print("Pick a word: ", end="", flush=True)
-        word = sys.stdin.readline().strip()
+        word = old_words[i]
+        i += 1
         words.append(word)
-
         solution = choose_word(solution, word)
+    next_words = ' '.join(sorted(first_words(solution)))
+    print(next_words)
+    print("Pick a word: ", end="", flush=True)
+    word = sys.stdin.readline().strip()
 
-    print(' '.join(words))
+    return word, words, solution
 
+
+if __name__ == '__main__':
+    import sys
+
+    words, skeleton, solution = run_cynghanedd()
+    
+    answer = ""
+    while not (answer == "n"):
+        print(' '.join(words))
+        print("Restart cynghanedd? y/n (or comma to go back): ", end="", flush=True)
+        answer = sys.stdin.readline().strip()
+        if answer not in ('y','n',','):
+            print("Please answer y/n (or comma to go back a step")
+        if answer == 'y':
+            print("New Skeleton")
+            words, skeleton, solution = run_cynghanedd()
+        if answer == ',':
+            word = ','
+            while word == ',':
+                word, words, solution = back_cynghanedd(words, skeleton)
+            words.append(word)
+
+            solution = choose_word(solution, word)
+
+            words, solution = complete_cyng(words, skeleton, solution)
+            
